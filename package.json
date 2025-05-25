@@ -12,6 +12,7 @@
   "scripts": {
     "verify": "run-p build lint test",
     "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspace packages/mcp",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
     "prepare": "npm run prepare --workspaces && husky && cd packages/openapi-mcp-server && npm run build",
