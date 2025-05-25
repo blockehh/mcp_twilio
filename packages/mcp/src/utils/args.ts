@@ -2,16 +2,14 @@ import { logger } from '@twilio-alpha/openapi-mcp-server';
 import minimist from 'minimist';
 
 import { isValidTwilioSid } from './general';
+import { serviceConfigs } from '../config';
 
 interface ParsedArgs {
   services: string[];
-  tags: string[];
   accountSid?: string;
   apiKey?: string;
   apiSecret?: string;
 }
-
-const DEFAULT_SERVICE = 'twilio_api_v2010';
 
 const sanitizeArgs = (args: string): string[] => {
   return args
@@ -31,14 +29,12 @@ const parsedArgs = async (argv: string[]): Promise<ParsedArgs> => {
       a: 'accountSid',
       k: 'apiKey',
       s: 'apiSecret',
-      t: 'tags',
       e: 'services',
     },
-    string: ['accountSid', 'apiKey', 'apiSecret', 'tags', 'services'],
+    string: ['accountSid', 'apiKey', 'apiSecret', 'services'],
   });
 
-  // eslint-disable-next-line prefer-const
-  let { services: sArgs, accountSid, apiKey, apiSecret, tags: tArgs } = parsed;
+  let { services: sArgs, accountSid, apiKey, apiSecret } = parsed;
 
   // Handle "accountSid/apiKey:apiSecret" format
   if (
@@ -74,16 +70,27 @@ const parsedArgs = async (argv: string[]): Promise<ParsedArgs> => {
     process.exit(1);
   }
 
-  let services = sanitizeArgs(sArgs);
-  if (services.length === 0 && !tArgs) {
-    services = [DEFAULT_SERVICE];
+  const services = sanitizeArgs(sArgs);
+  if (services.length === 0) {
+    logger.info('No services specified, using all available services');
+    return {
+      services: Object.keys(serviceConfigs),
+      accountSid,
+      apiKey,
+      apiSecret,
+    };
   }
 
-  const tags = sanitizeArgs(tArgs);
+  // Validate services
+  const invalidServices = services.filter(s => !serviceConfigs[s]);
+  if (invalidServices.length > 0) {
+    logger.error(`Error: Invalid services: ${invalidServices.join(', ')}`);
+    logger.info(`Available services: ${Object.keys(serviceConfigs).join(', ')}`);
+    process.exit(1);
+  }
 
   return {
     services,
-    tags,
     accountSid,
     apiKey,
     apiSecret,

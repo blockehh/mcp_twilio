@@ -3,12 +3,11 @@ import { logger } from '@twilio-alpha/openapi-mcp-server';
 
 import TwilioOpenAPIMCPServer from '@app/server';
 import { args, type AccountCredentials } from '@app/utils';
+import { getToolFilters } from '@app/config';
 
 export default async function main() {
   let credentials: AccountCredentials | null;
-  const { services, accountSid, apiKey, apiSecret, tags } = await args(
-    process.argv,
-  );
+  const { services, accountSid, apiKey, apiSecret } = await args(process.argv);
 
   if (accountSid && apiKey && apiSecret) {
     credentials = { accountSid, apiKey, apiSecret };
@@ -17,15 +16,14 @@ export default async function main() {
     process.exit(1);
   }
 
+  const filters = getToolFilters(services);
+
   const server = new TwilioOpenAPIMCPServer({
     server: {
       name: 'twilio-server',
       version: '0.0.1',
     },
-    filters: {
-      services,
-      tags,
-    },
+    filters,
     accountSid: credentials.accountSid,
     credentials: {
       apiKey: credentials.apiKey,
