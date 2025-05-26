@@ -15,10 +15,11 @@
     "dev": "npm run dev --workspace packages/mcp",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
-    "prepare": "npm run prepare --workspaces && husky && cd packages/openapi-mcp-server && npm run build",
+    "prepare": "npm run prepare --workspaces && husky && cd packages/mcp && npm run prepare",
     "test": "npm run test --workspaces",
     "test:coverage": "npm run test:coverage --workspaces",
-    "test:watch": "npm run test:watch --workspaces"
+    "test:watch": "npm run test:watch --workspaces",
+    "start": "node packages/mcp/build/index.js"
   },
   "lint-staged": {
     "src/**/*.ts": [
